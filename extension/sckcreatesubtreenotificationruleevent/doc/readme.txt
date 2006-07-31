@@ -1,0 +1,1 @@
+http://ez.no/community/contribs/workflow/sck_cen_create_subtree_notification_rule
