@@ -1,0 +1,2 @@
+1.0 beta
+- initial release on ez.no
