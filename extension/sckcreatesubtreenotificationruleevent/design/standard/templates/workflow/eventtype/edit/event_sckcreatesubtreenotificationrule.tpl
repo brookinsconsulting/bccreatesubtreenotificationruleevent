@@ -13,7 +13,7 @@
         valueArray['{$class.identifier}'] = new Array( );
         {let $attributes = fetch( 'class', 'attribute_list', hash( 'class_id', $class.id ) )}
         {foreach $attributes as $attribute}
-            optionArray['{$class.identifier}'].push( "{$attribute.name}" );
+            optionArray['{$class.identifier}'].push( "{$attribute.name|addslashes}" );
             valueArray['{$class.identifier}'].push( "{$attribute.id}" );
         {/foreach}
         {/let}
@@ -47,9 +47,9 @@ function syncSelectBoxes( fromid, toid, optionArray, valueArray )
 
             chosenOptions = optionArray[selectedValue];
             chosenValues = valueArray[selectedValue];
-            
+
             optionlen = chosenOptions.length;
-            
+
             for ( i = 0; i < optionlen; i++ )
             {
                 tolen = to.length;
