@@ -128,3 +128,8 @@ function removeAllOptions( selectid )
 {/if}
 </fieldset>
 </div>
+
+<div class="block">
+<label><input type="checkbox" name="Owner_{$event.id}" {if $event.use_owner}checked="checked"{/if} /> Owner</label>
+<label><input type="checkbox" name="Creator_{$event.id}" {if $event.use_creator}checked="checked"{/if} /> Creator</label>
+</div>
