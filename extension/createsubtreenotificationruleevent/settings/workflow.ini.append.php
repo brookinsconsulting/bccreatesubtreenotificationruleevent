@@ -1,9 +1,7 @@
-<?php
-/*
+<?php /* #?ini charset="utf-8"?
 
 [EventSettings]
-ExtensionDirectories[]=sckcreatesubtreenotificationruleevent
-AvailableEventTypes[]=event_sckcreatesubtreenotificationrule
+ExtensionDirectories[]=createsubtreenotificationruleevent
+AvailableEventTypes[]=event_createsubtreenotificationrule
 
-*/
-?>
+*/ ?>
