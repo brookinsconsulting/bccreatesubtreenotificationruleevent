@@ -1,6 +1,7 @@
 ﻿<?php
-
 /*
+
+Copyright (C) 2008 Kristof Coomans
 Copyright (C) 2006-2007 SCK-CEN
 Written by Kristof Coomans ( http://blog.kristofcoomans.be )
 
@@ -17,22 +18,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 */
 
 include_once( 'kernel/classes/ezworkflowtype.php' );
 
-define( 'EZ_WORKFLOW_TYPE_SCKCREATESUBTREENOTIFICATIONRULE', 'sckcreatesubtreenotificationrule' );
-
-class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
+class CreateSubtreeNotificationRuleType extends eZWorkflowEventType
 {
-    function SckCreateSubtreeNotificationRuleType()
+    const WORKFLOW_TYPE_STRING = "createsubtreenotificationrule";
+
+    function CreateSubtreeNotificationRuleType()
     {
-        $this->eZWorkflowEventType( EZ_WORKFLOW_TYPE_SCKCREATESUBTREENOTIFICATIONRULE, ezi18n( 'kernel/workflow/event', 'SCK-CEN Create Subtree Notification Rule' ) );
+        $this->eZWorkflowEventType( CreateSubtreeNotificationRuleType::WORKFLOW_TYPE_STRING, ezi18n( 'kernel/workflow/event', 'Create Subtree Notification Rule' ) );
         // limit workflows which use this event to be used only on the post-publish trigger
         $this->setTriggerTypes( array( 'content' => array( 'publish' => array( 'after' ) ) ) );
     }
 
-    function &attributeDecoder( &$event, $attr )
+    function attributeDecoder( $event, $attr )
     {
         $retValue = null;
         switch( $attr )
@@ -61,7 +63,7 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
 
             default:
             {
-                eZDebug::writeNotice( 'unknown attribute:' . $attr, 'SckCreateSubtreeNotificationRuleType' );
+                eZDebug::writeNotice( 'unknown attribute:' . $attr, 'CreateSubtreeNotificationRuleType' );
             }
         }
         return $retValue;
@@ -75,7 +77,7 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
     /*!
      \reimp
     */
-    function fetchHTTPInput( &$http, $base, &$event )
+    function fetchHTTPInput( $http, $base, $event )
     {
         eZDebug::writeDebug( $base );
         // this condition can be removed when this issue if fixed: http://issues.ez.no/10685
@@ -94,10 +96,10 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
     /*!
      \reimp
     */
-    function customWorkflowEventHTTPAction( &$http, $action, &$workflowEvent )
+    function customWorkflowEventHTTPAction( $http, $action, $workflowEvent )
     {
         $eventID = $workflowEvent->attribute( 'id' );
-        $module =& $GLOBALS['eZRequestedModule'];
+        $module = $GLOBALS['eZRequestedModule'];
 
         switch ( $action )
         {
@@ -127,7 +129,7 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
 
             default:
             {
-                eZDebug::writeNotice( 'unknown custom action: ' . $action, 'SckCreateSubtreeNotificationRuleType' );
+                eZDebug::writeNotice( 'unknown custom action: ' . $action, 'CreateSubtreeNotificationRuleType' );
             }
         }
     }
@@ -135,13 +137,14 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
     /*!
      \reimp
     */
-    function execute( &$process, &$event )
+    function execute( $process, $event )
     {
+        eZDebug::writeDebug( $parameters, 'CreateSubtreeNotificationRuleType::execute process parameter_list' );
+
         $parameters = $process->attribute( 'parameter_list' );
-        eZDebug::writeDebug( $parameters, 'SckCreateSubtreeNotificationRuleType::execute process parameter_list' );
 
         include_once( 'kernel/classes/ezcontentobject.php' );
-        $object =& eZContentObject::fetch( $parameters['object_id'] );
+        $object = eZContentObject::fetch( $parameters['object_id'] );
 
         $datamap = $object->attribute( 'data_map' );
         $attributeIDList = $event->attribute( 'selected_attributes' );
@@ -152,10 +155,10 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
         {
             if ( in_array( $attribute->attribute('contentclassattribute_id'), $attributeIDList ) )
             {
-                eZDebug::writeDebug( 'found matching attribute: ' . $attribute->attribute('contentclassattribute_id'), 'SckCreateSubtreeNotificationRuleType' );
+                eZDebug::writeDebug( 'found matching attribute: ' . $attribute->attribute('contentclassattribute_id'), 'CreateSubtreeNotificationRuleType' );
 
                 // get related objects
-                $relatedObjects =& $object->relatedContentObjectList( false, false, $attribute->attribute('contentclassattribute_id') );
+                $relatedObjects = $object->relatedContentObjectList( false, false, $attribute->attribute('contentclassattribute_id') );
 
                 include_once( 'kernel/classes/datatypes/ezuser/ezuser.php' );
                 foreach( $relatedObjects as $relatedObject )
@@ -166,7 +169,7 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
 
                     if ( $relatedUser )
                     {
-                        SckCreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $userID, $mainNodeID );
+                        CreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $userID, $mainNodeID );
                     }
                 }
             }
@@ -175,20 +178,20 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
         $ownerID = $object->attribute( 'owner_id' );
         if ( $event->attribute( 'use_owner' ) )
         {
-            SckCreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $ownerID, $mainNodeID );
+            CreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $ownerID, $mainNodeID );
         }
 
         if ( $event->attribute( 'use_creator' ) )
         {
-            $version =& eZContentObjectVersion::fetchVersion( $parameters['version'], $parameters['object_id'] );
+            $version = eZContentObjectVersion::fetchVersion( $parameters['version'], $parameters['object_id'] );
             $creatorID = $version->attribute( 'creator_id' );
             if ( !$event->attribute( 'use_owner' ) || $creatorID != $ownerID )
             {
-                SckCreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $creatorID, $mainNodeID );
+                CreateSubtreeNotificationRuleType::createNotificationRuleIfNeeded( $creatorID, $mainNodeID );
             }
         }
 
-        return EZ_WORKFLOW_TYPE_STATUS_ACCEPTED;
+        return eZWorkflowType::STATUS_ACCEPTED;
     }
 
     /*!
@@ -198,16 +201,16 @@ class SckCreateSubtreeNotificationRuleType extends eZWorkflowEventType
     {
         include_once( 'kernel/classes/notification/handler/ezsubtree/ezsubtreenotificationrule.php' );
 
-        $nodeIDList =& eZSubtreeNotificationRule::fetchNodesForUserID( $userID, false );
+        $nodeIDList = eZSubtreeNotificationRule::fetchNodesForUserID( $userID, false );
 
         if ( !in_array( $nodeID, $nodeIDList ) )
         {
-            $rule =& eZSubtreeNotificationRule::create( $nodeID, $userID );
+            $rule = eZSubtreeNotificationRule::create( $nodeID, $userID );
             $rule->store();
         }
     }
 }
 
-eZWorkflowEventType::registerType( EZ_WORKFLOW_TYPE_SCKCREATESUBTREENOTIFICATIONRULE, 'sckcreatesubtreenotificationruletype' );
+eZWorkflowEventType::registerEventType( CreateSubtreeNotificationRuleType::WORKFLOW_TYPE_STRING, 'CreateSubtreeNotificationRuleType' );
 
 ?>
