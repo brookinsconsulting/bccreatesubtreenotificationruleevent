@@ -139,9 +139,8 @@ class CreateSubtreeNotificationRuleType extends eZWorkflowEventType
     */
     function execute( $process, $event )
     {
-        eZDebug::writeDebug( $parameters, 'CreateSubtreeNotificationRuleType::execute process parameter_list' );
-
         $parameters = $process->attribute( 'parameter_list' );
+        eZDebug::writeDebug( $parameters, 'CreateSubtreeNotificationRuleType::execute process parameter_list' );
 
         include_once( 'kernel/classes/ezcontentobject.php' );
         $object = eZContentObject::fetch( $parameters['object_id'] );
